@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Episode List</title>
+    <link rel="stylesheet" href="style2.css">
+    <link rel="icon" type="image/x-icon"
+        href="logo.png">
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="newsec"><img src="logo.png" alt="logo">Series Section</h1>
+        
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html">Movies</a></li>
+            <li><a href="#">Series Section</a></li>
+            <li><a href="#">Drama</a></li>
+        </ul>
+    </nav>
+    <h1 id="series-title">Series</h1>
+    <p class="ep">Click On Episode links To Watch </p>
+    <div class="episode-container" id="episode-list">
+        <!-- Episodes will be added dynamically -->
+    </div>
+
+    <script>
+        // Get series name from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const seriesName = urlParams.get('name');
+
+        // Update page title with series name
+        document.getElementById('series-title').innerText = seriesName;
+
+        // Episode data with direct links
+        const seriesData = {
+            "Oops Ab Kya": [
+                { title: "Episode 1", url: "player.html?video=https://drive.google.com/file/d/1IT0xADUc-EwdCtTKGJRKALVu0tZ58GVP/preview" },
+                { title: "Episode 2", url: "player.html?video=https://drive.google.com/file/d/1ZTTtZea2ZUCBEnT11FA16ThoPhmHOoiW/preview" },
+                { title: "Episode 3", url: "player.html?video=https://drive.google.com/file/d/1tPsUJfLJT1G0Dp-e29DuGyHTydMFMmhP/preview" },
+                { title: "Episode 4", url: "player.html?video=https://drive.google.com/file/d/1kB5bEyCKo_3FFtCJcg3u-U2AZfrwuXLk/preview" },
+                { title: "Episode 5", url: "player.html?video=https://drive.google.com/file/d/1f9kzluR0NvKAYShtPe5H971kQqzpkkgp/preview" },
+                { title: "Episode 6", url: "player.html?video=https://drive.google.com/file/d/1UEOh_4C3C7sRhfB90SnEdBiqCt6Vs1d5/preview" },
+                { title: "Episode 7", url: "player.html?video=https://drive.google.com/file/d/1k5oz2jDZsGeAF3YbPJvEcG9vCLLFXM4o/preview" },
+                { title: "Episode 8", url: "player.html?video=https://drive.google.com/file/d/1fUZdPif78c2ilXXqqlGGm_ePKDSA3b0Y/preview" }
+            ],
+            "Pyar Ka Professor": [
+                { title: "Episode 1", url: "player.html?video=https://drive.google.com/file/d/1a9fcpfpCopOlgiCFwczu-DB3biVsdukE/preview" },
+                { title: "Episode 2", url: "player.html?video=https://drive.google.com/file/d/16GGHg6mpSEhVFADXmavm3zYtuvcyaviK/preview" },
+                { title: "Episode 3", url: "player.html?video=https://drive.google.com/file/d/1Gek9OQlVX-HGDm_gJA2NRkw6hhoPHcOn/preview" },
+                { title: "Episode 4", url: "player.html?video=https://drive.google.com/file/d/1PHC_lfQd4f7oHu-cCGpzCejJ6pXxxJp2/preview" },
+                { title: "Episode 5", url: "player.html?video=https://drive.google.com/file/d/10JaCCnO_b3V_OXSg4irlVZ748_IfzpC6/preview" },
+                { title: "Episode 6", url: "player.html?video=https://drive.google.com/file/d/1wq0ygE1BrPEUytkSLJmpDu7bTfe5WrAo/preview" }
+            ],
+            "Dupahiya": [
+                { title: "Episode 1", url: "player.html?video=https://drive.google.com/file/d/1bXN0LTEIJuc561hSzaUtfiWQ7i6eGYMb/preview" },
+                { title: "Episode 2", url: "player.html?video=https://drive.google.com/file/d/1Kg0XNry5RBW2CFhW-HqiFKeRdCo9O2Vl/preview" },
+                { title: "Episode 3", url: "player.html?video=https://drive.google.com/file/d/1NG-yUi-EBKAZTgepuOlLXAok6hKvafwF/preview" },
+                { title: "Episode 4", url: "player.html?video=https://drive.google.com/file/d/17a0c03keVwI_V_8245ZZ10KGIVUT0_7f/preview" },
+                { title: "Episode 5", url: "player.html?video=https://drive.google.com/file/d/169pI9H478KQEsgjJzU_Ip-pDKpCRbNyQ/preview" },
+                { title: "Episode 6", url: "player.html?video=https://drive.google.com/file/d/1y57CEFrN6yPFVJ12YO7XoJPgAWDW_xYO/preview" },
+                { title: "Episode 7", url: "player.html?video=https://drive.google.com/file/d/1CKUVves-NLolKFMMtgZaXm_GQYzy-Z-l/preview" },
+                { title: "Episode 8", url: "player.html?video=https://drive.google.com/file/d/1HQgIf_FxWXfUi90EnAoZ671sSMNjhomd/preview" },
+                { title: "Episode 9", url: "player.html?video=https://drive.google.com/file/d/1xHLcRP6a_y3QpOjCE2jaAoyHk32ZP9xL/preview" }
+            ],
+            "The Freelancer": [
+                { title: "Episode 1", url: "player.html?video=https://drive.google.com/file/d/1aGjQLcF6XXfwDzMy-R8LM4M1Pi-tCCSt/preview" },
+                { title: "Episode 2", url: "player.html?video=https://drive.google.com/file/d/1tM22ecvFZfsEq8BpX-ifj5-P_y-o4zd5/preview" },
+                { title: "Episode 3", url: "player.html?video=https://drive.google.com/file/d/18nOKL-sPEq_cWhv4HaMjJT_VG4sQHTf3/preview" },
+                { title: "Episode 4", url: "player.html?video=https://drive.google.com/file/d/1yQGb3I2xls0FcGr2PbjVj4iYE652r3D5/preview" },
+                { title: "Episode 5", url: "player.html?video=https://drive.google.com/file/d/1hPL7fkEiwAhM1M5-TKGtqteSgcSgvMHg/preview" },
+                { title: "Episode 6", url: "player.html?video=https://drive.google.com/file/d/1HPAH-yRQOth5pY2D4vHqffLMRZjzjC1Z/preview" },
+                { title: "Episode 7", url: "player.html?video=https://drive.google.com/file/d/1n0yJjdY61GBBFc0jH_PwbcX-cLWrUlZZ/preview" }
+            ]
+        };
+
+        // Get the episode list container
+        const episodeList = document.getElementById('episode-list');
+
+        // Add episodes dynamically
+        if (seriesData[seriesName]) {
+            seriesData[seriesName].forEach((episode) => {
+                const epLink = document.createElement("a");
+                epLink.href = episode.url;
+                epLink.innerText = episode.title;
+                epLink.classList.add("episode-link");
+                episodeList.appendChild(epLink);
+            });
+        } else {
+            episodeList.innerHTML = "<p>No episodes available.</p>";
+        }
+    </script>
+</body>
+</html>
