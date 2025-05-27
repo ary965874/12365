@@ -27,21 +27,36 @@
     <div class="container" id="movies">
 
         <div class="card">
-            <img src="" alt="dupahiya">
+            <img src="https://image.tmdb.org/t/p/w400/nnD4364ToXZwDpFWEnY94xzykIs.jpg" alt="The Royals">
+            <!-- <video src="https://v1.pinimg.com/videos/mc/720p/61/3e/5b/613e5b760ef247459d51eab364c25542.mp4"
+            alt="No Video" autoplay loop muted></video> -->
+            <div class="card-content">
+                <div class="card-title" data-title="The Royals">The Royals</div>
+                
+                <div class="card-description">Watch Here</div>
+                <div class="card-description">TOTAL EPISODES-08</div>
+                <!-- <p class="download-btn">Comming Soon</p> -->
+                <button class="download-btn" onclick="redirectToSeries('The Royals')">Watch online</button>
+                
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="https://image.tmdb.org/t/p/original/7kbmuNn37gENS4nq1CDSKGQbHia.jpg" alt="dupahiya">
             <!-- <video src="https://v1.pinimg.com/videos/mc/720p/61/3e/5b/613e5b760ef247459d51eab364c25542.mp4"
             alt="No Video" autoplay loop muted></video> -->
             <div class="card-content">
                 <div class="card-title" data-title="Dupahiya">Dupahiya</div>
                 
                 <div class="card-description">Watch Here</div>
-                <div class="card-description">TOTAL EPISODES-00</div>
+                <div class="card-description">TOTAL EPISODES-09</div>
                 <!-- <p class="download-btn">Comming Soon</p> -->
                 <button class="download-btn" onclick="redirectToSeries('Dupahiya')">Watch online</button>
                 
             </div>
         </div>
         <div class="card">
-            <img src=""
+            <img src="https://catimages.org/images/2023/12/15/The-Freelancer-S01-Hindi-WEBRip-ALL-Episodes-HDHub4u.jpg"
                 alt="The Freelancer">
             <div class="card-content">
                 <div class="card-title" data-title="Marco">The Freelancer</div>
@@ -114,7 +129,7 @@
 
 
     <script>
-        alert("Sorry Series are Unavailable For now.");
+        alert("Some Series Will redirect you to 3rd party Sites Which are completly safe to use....");
         function redirectToSeries(seriesName) {
             window.location.href = `series.html?name=${encodeURIComponent(seriesName)}`;
         }
