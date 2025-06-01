@@ -2,12 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Movie Card Generator</title>
+    <title>🎬 Movie Card Generator (TMDb)</title>
     <style>
         body {
             font-family: sans-serif;
             padding: 20px;
             background: #f4f4f4;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        #searchInput {
+            width: 300px;
+        }
+        .suggestions {
+            background: white;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            width: 300px;
+            position: absolute;
+            z-index: 999;
+        }
+        .suggestions div {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .suggestions div:hover {
+            background: #eee;
         }
         .card {
             width: 300px;
@@ -27,7 +50,7 @@
             font-weight: bold;
             font-size: 18px;
         }
-        .download-btn {
+        .download-btn, .copy-btn {
             margin-top: 10px;
             background: #007BFF;
             color: white;
@@ -45,85 +68,97 @@
 </head>
 <body>
 
-<h2>🎬 Movie Card Generator</h2>
+<h2>🎬 Movie Card Generator (with TMDb)</h2>
 
-<input type="text" id="searchInput" placeholder="Enter IMDb ID or Movie Name" style="width: 300px; padding: 10px;">
-<button onclick="generateCard()">Generate Card</button>
+<input type="text" id="searchInput" placeholder="Enter movie name or comma-separated names">
+<div class="suggestions" id="suggestionBox"></div>
+<button onclick="generateCards()">Generate Card(s)</button>
+<button onclick="copyOutput()" class="copy-btn">📋 Copy HTML</button>
 
 <div id="result"></div>
 
 <textarea id="htmlOutput" placeholder="HTML output will appear here..."></textarea>
 
 <script>
-    const apiKey = '46316a75'; // Replace with your OMDb API key if needed
+    const tmdbApiKey = '96b2227903ddc79337303ec7ebeb4b1e'; // Replace with your TMDb API key
 
-    async function generateCard() {
-        const input = document.getElementById('searchInput').value.trim();
-        if (!input) return alert('Enter IMDb ID or Movie Name');
+    const searchInput = document.getElementById('searchInput');
+    const suggestionBox = document.getElementById('suggestionBox');
 
-        let title, image;
-
-        // Fetch from OMDb API
-        let omdbUrl = input.startsWith('tt')
-            ? `https://www.omdbapi.com/?apikey=${apiKey}&i=${input}`
-            : `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(input)}`;
-
-        const omdbRes = await fetch(omdbUrl);
-        const omdbData = await omdbRes.json();
-
-        if (omdbData.Response === "False") {
-            alert("Movie not found in OMDb");
+    searchInput.addEventListener('input', async () => {
+        const query = searchInput.value.split(',').pop().trim();
+        if (query.length < 2) {
+            suggestionBox.innerHTML = '';
             return;
         }
 
-        title = omdbData.Title;
-        image = omdbData.Poster;
+        const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(query)}`);
+        const data = await res.json();
 
-        // Fetch from stream scraper
-        const searchUrl = `https://stream-scraper.onrender.com/search/${encodeURIComponent(title)}`;
-        const streamRes = await fetch(searchUrl);
-        const streamData = await streamRes.json();
-
-        if (!streamData.success || !streamData.movies.length) {
-            alert("No streaming links found.");
-            return;
-        }
-
-        let hdLink = null;
-        const episodes = streamData.movies[0].episodes || [];
-        episodes.forEach(ep => {
-            ep.watchLinks.forEach(link => {
-                if (link.type === "HDStream") {
-                    hdLink = link.url;
-                }
-            });
+        suggestionBox.innerHTML = '';
+        data.results.slice(0, 5).forEach(movie => {
+            const div = document.createElement('div');
+            div.textContent = movie.title;
+            div.onclick = () => {
+                const currentInput = searchInput.value.split(',');
+                currentInput[currentInput.length - 1] = movie.title;
+                searchInput.value = currentInput.join(', ').trim();
+                suggestionBox.innerHTML = '';
+            };
+            suggestionBox.appendChild(div);
         });
+    });
 
-        if (!hdLink) {
-            alert("HDStream link not found.");
-            return;
-        }
+    async function generateCards() {
+        const input = searchInput.value.trim();
+        if (!input) return alert('Please enter one or more movie names.');
+        
+        const movieNames = input.split(',').map(name => name.trim()).filter(name => name);
+        const resultContainer = document.getElementById('result');
+        const htmlOutput = document.getElementById('htmlOutput');
+        resultContainer.innerHTML = '';
+        htmlOutput.value = '';
 
-              // Modify HDStream URL to use /embed/
-        const embedLink = hdLink.replace("/file/", "/embed/");
+        for (let name of movieNames) {
+            const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(name)}`;
+            const searchRes = await fetch(searchUrl);
+            const searchData = await searchRes.json();
 
-        const cardHTML = `
+            if (!searchData.results.length) {
+                alert(`Movie not found: ${name}`);
+                continue;
+            }
+
+            const movie = searchData.results[0];
+            const title = movie.title;
+            const image = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
+
+            // Optional: Embed video logic placeholder
+            const embedLink = `https://www.youtube.com/results?search_query=${encodeURIComponent(title + " trailer")}`;
+
+            const cardHTML = `
 <div class="card">
     <img src="${image}" alt="${title}">
     <div class="card-content">
-        <div class="card-title" data-title="${title}">${title}</div>
+        <div class="card-title">${title}</div>
         <div class="card-description">Download and Watch Online</div>
-        <a href="player.html?video=${embedLink}" width="90%" height="600" allow="autoplay" target="_blank">
-            <button class="download-btn">Watch online</button>
+        <a href="${embedLink}" target="_blank">
+            <button class="download-btn">Watch Trailer</button>
         </a>
     </div>
 </div>
-        `.trim();
+            `.trim();
 
+            resultContainer.innerHTML += cardHTML;
+            htmlOutput.value += cardHTML + '\n\n';
+        }
+    }
 
-
-        document.getElementById('result').innerHTML = cardHTML;
-        document.getElementById('htmlOutput').value = cardHTML;
+    function copyOutput() {
+        const output = document.getElementById('htmlOutput');
+        output.select();
+        document.execCommand('copy');
+        alert('Copied to clipboard!');
     }
 </script>
 
