@@ -104,18 +104,23 @@
             return;
         }
 
+              // Modify HDStream URL to use /embed/
+        const embedLink = hdLink.replace("/file/", "/embed/");
+
         const cardHTML = `
 <div class="card">
     <img src="${image}" alt="${title}">
     <div class="card-content">
         <div class="card-title" data-title="${title}">${title}</div>
         <div class="card-description">Download and Watch Online</div>
-        <a href="player.html?video=${hdLink}" width="90%" height="600" allow="autoplay" target="_blank">
+        <a href="player.html?video=${embedLink}" width="90%" height="600" allow="autoplay" target="_blank">
             <button class="download-btn">Watch online</button>
         </a>
     </div>
 </div>
         `.trim();
+
+
 
         document.getElementById('result').innerHTML = cardHTML;
         document.getElementById('htmlOutput').value = cardHTML;
