@@ -1,103 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Movie Player (Ad-Free)</title>
+  <meta charset="UTF-8">
+  <title>Ad-Free Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      background: black;
       margin: 0;
-      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
       text-align: center;
-      font-family: Arial;
-      color: white;
     }
 
     h1 {
-      padding: 10px;
-    }
-
-    video {
-      width: 90%;
-      max-width: 800px;
-      height: auto;
-      border-radius: 20px;
       margin-top: 20px;
-      background: #000;
-      outline: none;
+      color: #00ffd5;
+      font-size: 26px;
     }
 
-    .controls {
+    iframe {
+      width: 90vw;
+      height: 60vh;
+      border: 2px solid #00ffd5;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+
+    #error-message {
+      color: red;
+      font-size: 18px;
       margin-top: 10px;
     }
 
-    .link-box {
-      margin: 20px auto;
-      padding: 10px;
-      background: #222;
+    .footer {
+      margin-top: 30px;
+      padding: 20px;
+      background: #111;
+      border-radius: 20px;
+    }
+
+    .share-btn {
+      background-color: #00ffd5;
+      color: #000;
+      padding: 10px 20px;
+      border: none;
+      font-size: 16px;
       border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .link-box input {
-      width: 80%;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    .link-box button {
-      padding: 10px;
-      margin-left: 5px;
-      border: none;
-      border-radius: 5px;
-      background: #0f0;
-      color: black;
       cursor: pointer;
+      margin-top: 15px;
     }
 
-    .link-box button:hover {
-      background: #0c0;
+    .popup {
+      display: none;
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00ffd5;
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      iframe {
+        height: 50vh;
+      }
+
+      .share-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      iframe {
+        height: 45vh;
+      }
     }
   </style>
 </head>
 <body>
+  <h1>🎬 Safe Movie Player</h1>
+  <iframe id="player" sandbox="allow-scripts allow-same-origin" allowfullscreen></iframe>
+  <p id="error-message"></p>
 
-  <h1>🎬 Ad-Free Movie Player</h1>
-
-  <video id="moviePlayer" controls autoplay>
-    <source src="" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <div class="link-box">
-    <input type="text" id="videoURL" placeholder="Paste direct MP4/M3U8 link here" />
-    <button onclick="loadVideo()">▶ Load Video</button>
+  <div class="footer">
+    <button class="share-btn" id="copyLinkBtn">📋 Copy Share Link</button>
+    <div class="popup" id="popup">Link copied to clipboard!</div>
+    <p>Enjoy your movie without ads 🚫</p>
   </div>
 
   <script>
-    function loadVideo() {
-      const url = document.getElementById("videoURL").value;
-      const video = document.getElementById("moviePlayer");
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoURL = urlParams.get("video");
 
-      if (url) {
-        video.src = url;
-        video.load();
-        video.play();
-      } else {
-        alert("Please enter a valid direct video URL.");
-      }
+    const player = document.getElementById("player");
+    const errorMsg = document.getElementById("error-message");
+
+    if (videoURL) {
+      player.src = decodeURIComponent(videoURL);
+    } else {
+      errorMsg.textContent = "⚠️ No video URL provided!";
     }
 
-    // Auto load from ?video= link
-    const params = new URLSearchParams(window.location.search);
-    const autoVideo = params.get("video");
-    if (autoVideo) {
-      document.getElementById("videoURL").value = autoVideo;
-      loadVideo();
-    }
+    document.getElementById("copyLinkBtn").addEventListener("click", () => {
+      const currentUrl = window.location.href;
+      navigator.clipboard.writeText(currentUrl).then(() => {
+        const popup = document.getElementById("popup");
+        popup.style.display = "block";
+        setTimeout(() => {
+          popup.style.display = "none";
+        }, 2000);
+      });
+    });
   </script>
 </body>
 </html>
