@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Series Card Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    .card {
+      width: 300px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      overflow: hidden;
+      margin: 20px auto;
+    }
+    .card img {
+      width: 100%;
+    }
+    .card-content {
+      padding: 15px;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .download-btn, .copy-btn {
+      margin-top: 10px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🎬 Web Series Card Generator</h2>
+
+<input type="text" id="searchInput" placeholder="Enter Web Series Name" style="width: 300px; padding: 10px;" />
+<button onclick="generateCard()">Generate Card</button>
+
+<div id="result"></div>
+
+<h3>Main Card HTML:</h3>
+<textarea id="htmlOutput" placeholder="HTML output will appear here..."></textarea>
+<button class="copy-btn" onclick="copyOutput('htmlOutput')">Copy HTML</button>
+
+<h3>Episode Links JSON:</h3>
+<textarea id="jsonOutput" placeholder="JSON output will appear here..."></textarea>
+<button class="copy-btn" onclick="copyOutput('jsonOutput')">Copy JSON</button>
+
+<script>
+  const tmdbApiKey = '96b2227903ddc79337303ec7ebeb4b1e'; // Replace with your TMDb API key
+
+  async function generateCard() {
+    const input = document.getElementById('searchInput').value.trim();
+    if (!input) return alert('Enter a web series name.');
+
+    // Fetch series info from TMDb
+    const tmdbUrl = `https://api.themoviedb.org/3/search/tv?api_key=${tmdbApiKey}&query=${encodeURIComponent(input)}`;
+    const tmdbRes = await fetch(tmdbUrl);
+    const tmdbData = await tmdbRes.json();
+    if (!tmdbData.results || !tmdbData.results.length) {
+      alert('Series not found on TMDb');
+      return;
+    }
+    const series = tmdbData.results[0];
+    const title = series.name;
+    const image = series.poster_path ? `https://image.tmdb.org/t/p/original${series.poster_path}` : '';
+
+    // Fetch streaming links from stream scraper
+    const searchUrl = `https://stream-scraper.onrender.com/search/${encodeURIComponent(title)}`;
+    const streamRes = await fetch(searchUrl);
+    const streamData = await streamRes.json();
+
+    if (!streamData.success || !streamData.movies.length) {
+      alert('No streaming links found.');
+      return;
+    }
+
+    const episodes = streamData.movies[0].episodes || [];
+    const totalEpisodes = episodes.length;
+
+    // Generate main card HTML
+    const cardHTML = `
+<div class="card">
+  <img src="${image}" alt="${title}">
+  <div class="card-content">
+    <div class="card-title" data-title="${title}">${title}</div>
+    <div class="card-description">Watch Here</div>
+    <div class="card-description">TOTAL EPISODES-${totalEpisodes}</div>
+    <button class="download-btn" onclick="redirectToSeries('${title}')">Watch online</button>
+  </div>
+</div>
+    `.trim();
+
+    document.getElementById('result').innerHTML = cardHTML;
+    document.getElementById('htmlOutput').value = cardHTML;
+
+    // Generate episode links JSON
+    const episodeLinks = episodes.map((ep, index) => {
+      const hubLink = ep.watchLinks.find(link => link.type === 'HubStream');
+      const url = hubLink ? `player.html?video=https://hdstream4u.com/embed/${hubLink.url.split('#')[1]}` : '';
+      return { title: `Episode ${index + 1}`, url };
+    });
+
+    const jsonOutput = {
+      [title]: episodeLinks
+    };
+
+    document.getElementById('jsonOutput').value = JSON.stringify(jsonOutput, null, 2);
+  }
+
+  function copyOutput(id) {
+    const textarea = document.getElementById(id);
+    textarea.select();
+    document.execCommand('copy');
+    alert('Copied to clipboard!');
+  }
+
+  function redirectToSeries(title) {
+    // Implement redirection logic here
+    alert(`Redirecting to series: ${title}`);
+  }
+</script>
+
+</body>
+</html>
