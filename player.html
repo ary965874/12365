@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Clean Movie Player</title>
+  <title>Landscape Movie Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <style>
     html, body {
@@ -21,6 +21,7 @@
       width: 100vw;
       height: 100vh;
       z-index: 1;
+      background: black;
     }
 
     iframe {
@@ -55,31 +56,32 @@
     if (videoURL) {
       player.src = decodeURIComponent(videoURL);
     } else {
-      alert("No video URL provided.");
+      alert("⚠️ No video URL provided.");
     }
 
-    // Auto fullscreen on load
-    function goFullscreen() {
+    function goFullscreenAndLockOrientation() {
       const container = document.getElementById("player-container");
-      if (container.requestFullscreen) {
-        container.requestFullscreen();
-      } else if (container.webkitRequestFullscreen) {
-        container.webkitRequestFullscreen();
-      } else if (container.msRequestFullscreen) {
-        container.msRequestFullscreen();
-      } else if (container.mozRequestFullScreen) {
-        container.mozRequestFullScreen();
+
+      // Request fullscreen
+      const requestFull = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen || container.mozRequestFullScreen;
+      if (requestFull) requestFull.call(container);
+
+      // Lock to landscape
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(err => {
+          console.warn("Orientation lock failed:", err);
+        });
       }
     }
 
-    // Trigger fullscreen once the user interacts (required on mobile)
+    // Trigger fullscreen + orientation lock on first interaction
     window.addEventListener("click", () => {
-      goFullscreen();
+      goFullscreenAndLockOrientation();
     }, { once: true });
 
-    // Optional: auto attempt after load (desktop)
     window.onload = () => {
-      goFullscreen();
+      // Try fullscreen automatically on load for desktop
+      goFullscreenAndLockOrientation();
     };
   </script>
 
