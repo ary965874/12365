@@ -1,82 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Movie Card Generator (Debug Mode)</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background: #f4f4f4;
-        }
-        .card {
-            width: 300px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
-            overflow: hidden;
-            margin: 20px auto;
-        }
-        .card img {
-            width: 100%;
-        }
-        .card-content {
-            padding: 15px;
-        }
-        .card-title {
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .download-btn, .copy-btn {
-            margin-top: 10px;
-            background: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        textarea {
-            width: 100%;
-            height: 200px;
-            margin-top: 20px;
-        }
-        #progress {
-            background: #fff3cd;
-            border: 1px solid #ffeeba;
-            padding: 10px;
-            margin-bottom: 15px;
-            color: #856404;
-        }
-        ul#suggestions {
-            list-style: none;
-            padding: 0;
-            max-height: 150px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid #ccc;
-            width: 300px;
-            position: absolute;
-            z-index: 1000;
-        }
-        #suggestions li {
-            padding: 10px;
-            cursor: pointer;
-        }
-        #suggestions li:hover {
-            background: #eee;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Movie Card Generator (with Progress)</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    .card {
+      width: 300px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+      overflow: hidden;
+      margin: 20px auto;
+    }
+    .card img {
+      width: 100%;
+    }
+    .card-content {
+      padding: 15px;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .download-btn, .copy-btn {
+      margin-top: 10px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 20px;
+    }
+    ul#suggestions {
+      list-style: none;
+      padding: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      width: 300px;
+      position: absolute;
+      z-index: 1000;
+    }
+    #suggestions li {
+      padding: 10px;
+      cursor: pointer;
+    }
+    #suggestions li:hover {
+      background: #eee;
+    }
+    #progress {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 10px;
+      color: #856404;
+      margin-top: 10px;
+      border-radius: 5px;
+      width: fit-content;
+    }
+  </style>
 </head>
 <body>
 
-<h2>🎬 Movie Card Generator</h2>
-
-<div id="progress">Progress will be shown here...</div>
+<h2>🎬 Movie Card Generator (with Progress)</h2>
 
 <input type="text" id="searchInput" placeholder="Enter Movie Name" style="width: 300px; padding: 10px;" autocomplete="off">
 <ul id="suggestions"></ul>
 <button onclick="generateCard()">Generate Card</button>
+
+<div id="progress"></div>
+
 <br><br>
 <textarea id="bulkInput" placeholder="Enter movie names (one per line) for bulk generation..."></textarea>
 <button onclick="bulkGenerate()">Generate Bulk Cards</button>
@@ -87,115 +90,112 @@
 <button class="copy-btn" onclick="copyOutput()">Copy HTML</button>
 
 <script>
-    const tmdbApiKey = '96b2227903ddc79337303ec7ebeb4b1e';
-    const progress = document.getElementById('progress');
-    const searchInput = document.getElementById('searchInput');
-    const suggestions = document.getElementById('suggestions');
+  const tmdbApiKey = '96b2227903ddc79337303ec7ebeb4b1e';
 
-    searchInput.addEventListener('input', async () => {
-        const query = searchInput.value.trim();
+  const searchInput = document.getElementById('searchInput');
+  const suggestions = document.getElementById('suggestions');
+  const progressDiv = document.getElementById('progress');
+
+  function updateProgress(message) {
+    progressDiv.innerHTML = `🔄 ${message}`;
+  }
+
+  searchInput.addEventListener('input', async () => {
+    const query = searchInput.value.trim();
+    suggestions.innerHTML = '';
+    if (query.length < 2) return;
+
+    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    data.results.slice(0, 5).forEach(movie => {
+      const li = document.createElement('li');
+      li.textContent = movie.title;
+      li.onclick = () => {
+        searchInput.value = movie.title;
         suggestions.innerHTML = '';
-        if (query.length < 2) return;
-
-        const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        data.results.slice(0, 5).forEach(movie => {
-            const li = document.createElement('li');
-            li.textContent = movie.title;
-            li.onclick = () => {
-                searchInput.value = movie.title;
-                suggestions.innerHTML = '';
-            };
-            suggestions.appendChild(li);
-        });
+      };
+      suggestions.appendChild(li);
     });
+  });
 
-    function updateProgress(msg) {
-        progress.innerText = msg;
+  async function getMovieInfo(title) {
+    updateProgress(`Searching TMDb for "${title}"...`);
+    const tmdbUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(title)}`;
+    const res = await fetch(tmdbUrl);
+    const data = await res.json();
+    if (!data.results || !data.results.length) {
+      updateProgress("❌ Movie not found on TMDb.");
+      return null;
     }
 
-    async function getMovieInfo(title) {
-        updateProgress(`🔍 Searching "${title}" on TMDb...`);
-        const tmdbUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(title)}`;
-        const res = await fetch(tmdbUrl);
-        const data = await res.json();
-        if (!data.results || !data.results.length) return null;
+    const movie = data.results[0];
+    const image = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
+    updateProgress(`✅ Found movie: ${movie.title}`);
+    return { title: movie.title, image };
+  }
 
-        const movie = data.results[0];
-        const image = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
-        return { title: movie.title, image };
+  async function getHDLink(title) {
+    updateProgress(`Searching HDStream links for "${title}"...`);
+    const searchUrl = `https://hd4uscrap.vercel.app/search/${encodeURIComponent(title)}`;
+    const res = await fetch(searchUrl);
+    const data = await res.json();
+
+    if (!data.success || !data.movies.length) {
+      updateProgress("❌ No HDStream data found in API.");
+      return null;
     }
 
-    async function getHDLink(title) {
-        updateProgress(`🎥 Looking for HDStream link for "${title}"...`);
-        const searchUrl = `https://hd4uscrap.vercel.app/search/${encodeURIComponent(title)}`;
-        const res = await fetch(searchUrl);
-        const data = await res.json();
-
-        if (!data.success || !data.movies.length) {
-            updateProgress(`❌ No movies found for "${title}" in HD API`);
-            return null;
+    for (let movie of data.movies) {
+      const episodes = movie.episodes || [];
+      for (let ep of episodes) {
+        for (let link of ep.watchLinks) {
+          if (link.type === "HDStream" && link.url.includes("/file/")) {
+            updateProgress("✅ Found HDStream link.");
+            return link.url.replace("/file/", "/embed/");
+          }
         }
-
-        for (let movie of data.movies) {
-            const episodes = movie.episodes || [];
-            for (let ep of episodes) {
-                for (let link of ep.watchLinks) {
-                    if (link.type === "HDStream" && link.url.includes("/file/")) {
-                        updateProgress(`✅ HDStream link found for "${title}"`);
-                        return link.url.replace("/file/", "/embed/");
-                    }
-                }
-            }
-        }
-
-        updateProgress(`❌ HDStream link not found for "${title}"`);
-        return null;
+      }
     }
 
-    async function generateCard() {
-        const input = searchInput.value.trim();
-        if (!input) return alert('Enter a movie name.');
+    updateProgress("❌ HDStream link not found.");
+    return null;
+  }
 
-        updateProgress('⏳ Starting generation...');
-        const movieInfo = await getMovieInfo(input);
-        if (!movieInfo) return updateProgress('❌ Movie not found on TMDb.');
+  async function generateCard() {
+    const input = searchInput.value.trim();
+    if (!input) return alert('Enter a movie name.');
 
-        const embedLink = await getHDLink(movieInfo.title);
-        if (!embedLink) return updateProgress('❌ HDStream link not found.');
+    const movieInfo = await getMovieInfo(input);
+    if (!movieInfo) return;
 
-        const cardHTML = generateHTMLCard(movieInfo.title, movieInfo.image, embedLink);
-        document.getElementById('result').innerHTML = cardHTML;
-        document.getElementById('htmlOutput').value = cardHTML;
-        updateProgress('✅ Card generated successfully!');
+    const embedLink = await getHDLink(movieInfo.title);
+    if (!embedLink) return;
+
+    const cardHTML = generateHTMLCard(movieInfo.title, movieInfo.image, embedLink);
+    document.getElementById('result').innerHTML = cardHTML;
+    document.getElementById('htmlOutput').value = cardHTML;
+    updateProgress("✅ Card generated successfully!");
+  }
+
+  async function bulkGenerate() {
+    const names = document.getElementById('bulkInput').value.trim().split('\n');
+    let finalHTML = '';
+    for (let name of names) {
+      const movieInfo = await getMovieInfo(name);
+      if (!movieInfo) continue;
+
+      const embedLink = await getHDLink(movieInfo.title);
+      if (!embedLink) continue;
+
+      finalHTML += generateHTMLCard(movieInfo.title, movieInfo.image, embedLink) + "\n\n";
     }
+    document.getElementById('result').innerHTML = finalHTML;
+    document.getElementById('htmlOutput').value = finalHTML;
+    updateProgress("✅ Bulk cards generated.");
+  }
 
-    async function bulkGenerate() {
-        const names = document.getElementById('bulkInput').value.trim().split('\n');
-        let finalHTML = '';
-        for (let name of names) {
-            updateProgress(`🔄 Generating card for "${name}"`);
-            const movieInfo = await getMovieInfo(name);
-            if (!movieInfo) {
-                updateProgress(`❌ TMDb not found for "${name}"`);
-                continue;
-            }
-
-            const embedLink = await getHDLink(movieInfo.title);
-            if (!embedLink) {
-                updateProgress(`❌ HD link not found for "${movieInfo.title}"`);
-                continue;
-            }
-
-            finalHTML += generateHTMLCard(movieInfo.title, movieInfo.image, embedLink) + "\n\n";
-        }
-        document.getElementById('result').innerHTML = finalHTML;
-        document.getElementById('htmlOutput').value = finalHTML;
-        updateProgress('✅ Bulk generation completed!');
-    }
-
-    function generateHTMLCard(title, image, embedLink) {
-        return `
+  function generateHTMLCard(title, image, embedLink) {
+    return `
 <div class="card">
     <img src="${image}" alt="${title}">
     <div class="card-content">
@@ -206,15 +206,15 @@
         </a>
     </div>
 </div>
-        `.trim();
-    }
+    `.trim();
+  }
 
-    function copyOutput() {
-        const textarea = document.getElementById('htmlOutput');
-        textarea.select();
-        document.execCommand('copy');
-        alert('✅ HTML copied to clipboard!');
-    }
+  function copyOutput() {
+    const textarea = document.getElementById('htmlOutput');
+    textarea.select();
+    document.execCommand('copy');
+    alert('HTML copied to clipboard!');
+  }
 </script>
 
 </body>
