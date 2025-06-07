@@ -112,29 +112,26 @@
         return { title: movie.title, image };
     }
 
-   async function getHDLink(title) {
-    const searchUrl = `https://hd4uscrap.vercel.app/search/${encodeURIComponent(title)}`;
-    const res = await fetch(searchUrl);
-    const data = await res.json();
+    // ✅ Updated HDStream extractor logic (no title match dependency)
+    async function getHDLink(title) {
+        const searchUrl = `https://hd4uscrap.vercel.app/search/${encodeURIComponent(title)}`;
+        const res = await fetch(searchUrl);
+        const data = await res.json();
 
-    if (!data.success || !data.movies.length) return null;
+        if (!data.success || !data.movies.length) return null;
 
-    for (let movie of data.movies) {
-        const episodes = movie.episodes || [];
-        for (let ep of episodes) {
-            for (let link of ep.watchLinks) {
-                if (link.type === "HDStream" && link.url.includes("/file/")) {
-                    return link.url.replace("/file/", "/embed/");
+        for (let movie of data.movies) {
+            const episodes = movie.episodes || [];
+            for (let ep of episodes) {
+                for (let link of ep.watchLinks) {
+                    if (link.type === "HDStream" && link.url.includes("/file/")) {
+                        return link.url.replace("/file/", "/embed/");
+                    }
                 }
             }
         }
-    }
 
-    return null; // No HDStream found in any movie
-}
-
-
-        return null;
+        return null; // No valid HDStream link found
     }
 
     async function generateCard() {
