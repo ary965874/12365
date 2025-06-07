@@ -119,17 +119,20 @@
 
         if (!data.success || !data.movies.length) return null;
 
-        let hdLink = null;
-        const episodes = data.movies[0].episodes || [];
-        episodes.forEach(ep => {
-            ep.watchLinks.forEach(link => {
-                if (link.type === "HDStream") {
-                    hdLink = link.url;
+        for (let movie of data.movies) {
+            if (movie.title.toLowerCase().includes(title.toLowerCase())) {
+                const episodes = movie.episodes || [];
+                for (let ep of episodes) {
+                    for (let link of ep.watchLinks) {
+                        if (link.type === "HDStream") {
+                            return link.url.replace("/file/", "/embed/");
+                        }
+                    }
                 }
-            });
-        });
+            }
+        }
 
-        return hdLink ? hdLink.replace("/file/", "/embed/") : null;
+        return null;
     }
 
     async function generateCard() {
@@ -152,10 +155,16 @@
         let finalHTML = '';
         for (let name of names) {
             const movieInfo = await getMovieInfo(name);
-            if (!movieInfo) continue;
+            if (!movieInfo) {
+                console.warn(`TMDb data not found for: ${name}`);
+                continue;
+            }
 
             const embedLink = await getHDLink(movieInfo.title);
-            if (!embedLink) continue;
+            if (!embedLink) {
+                console.warn(`HD link not found for: ${movieInfo.title}`);
+                continue;
+            }
 
             finalHTML += generateHTMLCard(movieInfo.title, movieInfo.image, embedLink) + "\n\n";
         }
