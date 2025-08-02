@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Simple Movie Player</title>
+  <title>Ad-Free Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <style>
     html, body {
@@ -68,15 +68,45 @@
       alert("⚠️ No video URL provided.");
     }
 
-    // Optional: auto fullscreen
+    // Fullscreen
     function goFullscreen() {
       const container = document.getElementById("player-container");
       const reqFull = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen || container.mozRequestFullScreen;
       if (reqFull) reqFull.call(container);
     }
 
-    window.addEventListener("click", () => goFullscreen(), { once: true });
-    window.onload = () => goFullscreen();
+    // Prevent most popup ads
+    function blockPopups(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function disablePopupHijack() {
+      // Remove ability to open new tabs
+      window.open = function () {
+        console.log("Blocked window.open");
+        return null;
+      };
+
+      // Block common events used by pop ads
+      ['click', 'mousedown', 'mouseup', 'touchstart'].forEach(evt =>
+        document.addEventListener(evt, blockPopups, true)
+      );
+    }
+
+    // Run protections early
+    disablePopupHijack();
+
+    // Trigger fullscreen on first interaction
+    window.addEventListener("click", () => {
+      disablePopupHijack();
+      goFullscreen();
+    }, { once: true });
+
+    window.onload = () => {
+      disablePopupHijack();
+      goFullscreen();
+    };
   </script>
 
 </body>
