@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Player</title>
+  <title>Simple Movie Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <style>
     html, body {
@@ -47,31 +47,12 @@
       height: 30px;
       background-color: black;
     }
-
-    @media (orientation: portrait) {
-      body::before {
-        content: "Please rotate your device 📱↪️";
-        position: fixed;
-        top: 0;
-        left: 0;
-        background: #000;
-        color: #00ffd5;
-        width: 100vw;
-        height: 100vh;
-        font-size: 24px;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-      }
-    }
   </style>
 </head>
 <body>
 
   <div id="player-container">
-<iframe id="player" allowfullscreen loading="eager"></iframe>
+    <iframe id="player" allowfullscreen loading="eager"></iframe>
     <div id="blocker">
       <div class="watermark-cover"></div>
     </div>
@@ -87,14 +68,11 @@
       alert("⚠️ No video URL provided.");
     }
 
+    // Optional: auto fullscreen
     function goFullscreen() {
       const container = document.getElementById("player-container");
       const reqFull = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen || container.mozRequestFullScreen;
       if (reqFull) reqFull.call(container);
-
-      if (screen.orientation?.lock) {
-        screen.orientation.lock('landscape').catch(() => {});
-      }
     }
 
     window.addEventListener("click", () => goFullscreen(), { once: true });
@@ -103,4 +81,3 @@
 
 </body>
 </html>
-
