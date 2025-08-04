@@ -48,6 +48,16 @@
       background-color: black;
     }
 
+    #click-blocker {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: transparent;
+      z-index: 10000;
+    }
+
     @media (orientation: portrait) {
       body::before {
         content: "Please rotate your device 📱↪️";
@@ -71,10 +81,11 @@
 <body>
 
   <div id="player-container">
-<iframe id="player" allowfullscreen loading="eager"></iframe>
+    <iframe id="player" allowfullscreen loading="eager"></iframe>
     <div id="blocker">
       <div class="watermark-cover"></div>
     </div>
+    <div id="click-blocker"></div>
   </div>
 
   <script>
@@ -97,8 +108,17 @@
       }
     }
 
-    window.addEventListener("click", () => goFullscreen(), { once: true });
-    window.onload = () => goFullscreen();
+    // First click blocker to avoid iframe popups
+    const clickBlocker = document.getElementById("click-blocker");
+    clickBlocker.addEventListener("click", () => {
+      clickBlocker.remove(); // Absorbs first click to avoid popup
+      goFullscreen();
+    });
+
+    window.onload = () => {
+      // Optional: try auto fullscreen on load
+      setTimeout(goFullscreen, 300);
+    };
   </script>
 
 </body>
