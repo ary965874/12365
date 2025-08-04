@@ -2,43 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ad-Free Player Attempt</title>
+  <title>Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       background: #000;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
     }
-    iframe {
+
+    #player-container {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
+      background: black;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
       border: none;
+    }
+
+    #blocker {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .watermark-cover {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 100px;
+      height: 30px;
+      background-color: black;
+    }
+
+    @media (orientation: portrait) {
+      body::before {
+        content: "Please rotate your device 📱↪️";
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #000;
+        color: #00ffd5;
+        width: 100vw;
+        height: 100vh;
+        font-size: 24px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+      }
     }
   </style>
 </head>
 <body>
 
-<iframe id="videoFrame" src="https://mivalyo.com/embed/klkd7771m3ks" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+  <div id="player-container">
+<iframe id="player" allowfullscreen loading="eager"></iframe>
+    <div id="blocker">
+      <div class="watermark-cover"></div>
+    </div>
+  </div>
 
-<script>
-  const iframe = document.getElementById('videoFrame');
+  <script>
+    const videoURL = new URLSearchParams(location.search).get("video");
+    const player = document.getElementById("player");
 
-  iframe.onload = () => {
-    try {
-      // Wait a bit and then try to simulate click (not guaranteed due to sandbox)
-      setTimeout(() => {
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-        const playBtn = iframeDoc.querySelector('.jw-icon-display');
-        if (playBtn) {
-          playBtn.click();
-        }
-      }, 2000);
-    } catch (err) {
-      console.warn("Can't access iframe content due to cross-origin restrictions.");
+    if (videoURL) {
+      player.src = decodeURIComponent(videoURL);
+    } else {
+      alert("⚠️ No video URL provided.");
     }
-  };
-</script>
+
+    function goFullscreen() {
+      const container = document.getElementById("player-container");
+      const reqFull = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen || container.mozRequestFullScreen;
+      if (reqFull) reqFull.call(container);
+
+      if (screen.orientation?.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }
+
+    window.addEventListener("click", () => goFullscreen(), { once: true });
+    window.onload = () => goFullscreen();
+  </script>
 
 </body>
 </html>
